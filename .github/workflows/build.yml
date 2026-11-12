@@ -1,44 +1,12 @@
-name: Build iOS IPA
-
-on:
-  push:
-    branches: [ main ]
-  workflow_dispatch:
+name: Test Build
+on: [push, workflow_dispatch]
 
 jobs:
   build:
-    # Используем macos-13, так как macos-14-arm64 часто недоступен
     runs-on: macos-13
     steps:
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
       
-      - name: Install XcodeGen
-        run: brew install xcodegen
-      
-      - name: Generate Project
-        run: xcodegen generate
-      
-      - name: Build Archive
-        run: |
-          xcodebuild -project iPhoneDuo.xcodeproj \
-            -scheme iPhoneDuo \
-            -configuration Release \
-            -sdk iphoneos \
-            -derivedDataPath build \
-            CODE_SIGNING_ALLOWED=NO \
-            CODE_SIGNING_REQUIRED=NO \
-            CODE_SIGN_IDENTITY="" \
-            archive -archivePath build/iPhoneDuo.xcarchive
-      
-      - name: Create IPA
-        run: |
-          mkdir -p build/Payload
-          cp -r build/iPhoneDuo.xcarchive/Products/Applications/iPhoneDuo.app build/Payload/
-          cd build && zip -r iPhoneDuo.ipa Payload
-      
-      - name: Upload IPA
-        uses: actions/upload-artifact@v4
-        with:
-          name: iPhoneDuo-IPA
-          path: build/iPhoneDuo.ipa
+      - name: Say Hello
+        run: echo "Runner is working!"

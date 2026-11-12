@@ -1,0 +1,41 @@
+workflows:
+  ios-ipa-build:
+    name: iPhone Duo IPA Build
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      xcode: latest
+      cocoapods: default
+      vars:
+        BUNDLE_ID: "com.illalantuh.iPhoneDuo"
+    scripts:
+      - name: Install XcodeGen
+        script: |
+          brew install xcodegen
+      - name: Generate Xcode Project
+        script: |
+          xcodegen generate
+      - name: Build IPA (unsigned)
+        script: |
+          xcodebuild -project iPhoneDuo.xcodeproj \
+            -scheme iPhoneDuo \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGNING_ALLOWED=NO \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGN_IDENTITY="" \
+            archive -archivePath build/iPhoneDuo.xcarchive
+          
+          mkdir -p build/Payload
+          cp -r build/iPhoneDuo.xcarchive/Products/Applications/iPhoneDuo.app build/Payload/
+          cd build && zip -r iPhoneDuo.ipa Payload
+    artifacts:
+      - build/iPhoneDuo.ipa
+    publishing:
+      email:
+        recipients:
+          - illalantuh11@gmail.com
+        notify:
+          success: true
+          failure: true
